@@ -255,6 +255,13 @@ export class SpotClient extends BaseRestClient {
     return this.getPrivate('/api/spot/v1/account/assets', { coin });
   }
 
+  /** 获取现货有价账户资产
+   * coin:币种, 默认不传时返回非0的币种记录，为0的币种不返回
+   */
+  getAssetsLite(coin?: string): Promise<APIResponse<CoinBalance[]>> {
+    return this.getPrivate('/api/spot/v1/account/assets-lite', { coin });
+  }
+
   /** Get sub Account Spot Asset */
   getSubAccountSpotAssets(): Promise<APIResponse<any>> {
     return this.postPrivate('/api/spot/v1/account/sub-account-spot-assets');
