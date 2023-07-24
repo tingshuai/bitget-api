@@ -200,8 +200,6 @@ export default abstract class BaseRestClient {
     // Something happened in setting up the request that triggered an error
     if (!e.response) {
       if (!e.request) {
-        console.log("e.request",e.request);
-        
         throw e.message;
       }
 
@@ -213,8 +211,7 @@ export default abstract class BaseRestClient {
     // that falls out of the range of 2xx
     const response: AxiosResponse = e.response;
     // console.error('err: ', response?.data);
-    console.log('e----',e);
-    
+
     throw {
       code: response.status,
       message: response.statusText,
