@@ -347,11 +347,11 @@ export class RestClientV2 extends BaseRestClient {
   }
 
   getSpotMainSubTransferRecord(params: object): Promise<APIResponse<any>> {
-    return this.getPrivate(`/api/v2/spot/account/sub-main-trans-record`,params);
+    return this.getPrivate(`/api/v2/spot/account/sub-main-trans-record`, params);
   }
 
   getSubAccountDepositRecords(params: object): Promise<APIResponse<any>> {
-    return this.getPrivate(`/api/v2/spot/wallet/subaccount-deposit-records`,params);
+    return this.getPrivate(`/api/v2/spot/wallet/subaccount-deposit-records`, params);
   }
 
 
@@ -864,6 +864,47 @@ export class RestClientV2 extends BaseRestClient {
     return this.getPrivate(`/api/v2/margin/${marginType}/fills`, params);
   }
 
+
+  /**
+   *
+   * * Earn (Savings)
+   *
+  */
+  getSavingProduct(params) {
+    return this.getPrivate('/api/v2/earn/savings/product', params);
+  }
+
+  getSavingAccount(params) {
+    return this.getPrivate('/api/v2/earn/savings/account', params);
+  }
+
+  getSavingAssets(params) {
+    return this.getPrivate('/api/v2/earn/savings/assets', params);
+  }
+
+  getSavingAssetsHistory(params) {
+    return this.getPrivate('/api/v2/earn/savings/records', params);
+  }
+
+  getSavingSubscribeInfo(params) {
+    return this.getPrivate('/api/v2/earn/savings/subscribe-info', params);
+  }
+
+  savingSubscribe(params) {
+    return this.postPrivate('/api/v2/earn/savings/subscribe', params);
+  }
+
+  getSavingSubscribeResult(params) {
+    return this.getPrivate('/api/v2/earn/savings/subscribe-result', params);
+  }
+
+  savingRedeem(params) {
+    return this.postPrivate('/api/v2/earn/savings/redeem', params);
+  }
+
+  getSavingRedeemResult(params) {
+    return this.getPrivate('/api/v2/earn/savings/redeem-result', params);
+  }
   /**
    *
    *

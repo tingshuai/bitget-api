@@ -1,6 +1,6 @@
 {
   "name": "bitget-api",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Node.js & JavaScript SDK for Bitget REST APIs & WebSockets, with TypeScript & end-to-end tests.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -11,7 +11,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "clean": "rm -rf lib dist",
+    "clean": "rimraf lib dist",
     "build": "tsc",
     "build:clean": "npm run clean && npm run build",
     "build:watch": "npm run clean && tsc --watch",
