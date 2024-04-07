@@ -24,12 +24,18 @@ import {
   FuturesMarketTrade,
   FuturesPlanType,
   FuturesKlineInterval,
+  FuturesHistoricPositions,
+  ModifyFuturesOrder,
+  FuturesCandleData,
 } from './types';
 import { REST_CLIENT_TYPE_ENUM } from './util';
 import BaseRestClient from './util/BaseRestClient';
 
 /**
- * REST API client
+ * REST API client for the V1 bitget Futures APIs. These are the previous generation of Bitget's APIs and should be considered deprecated.
+ * These will be removed in a future release, once Bitget formally deprecates them.
+ *
+ * @deprecated use RestClientV2 instead
  */
 export class FuturesClient extends BaseRestClient {
   getClientType() {
@@ -99,14 +105,16 @@ export class FuturesClient extends BaseRestClient {
     symbol: string,
     granularity: FuturesKlineInterval,
     startTime: string,
-    endTime: string,
+    endTime: string, 
     limit?: string,
-  ): Promise<any> {
+    kLineType?: 'market' | 'mark' | 'index'
+  ): Promise<APIResponse<FuturesCandleData[]>> {
     return this.get('/api/mix/v1/market/candles', {
       symbol,
       granularity,
       startTime,
       endTime,
+      kLineType,
       limit,
     });
   }
@@ -316,6 +324,13 @@ export class FuturesClient extends BaseRestClient {
     });
   }
 
+  /** Get All historic positions, only supports Query within 3 months  */
+  getHistoryPositions(
+    params: FuturesHistoricPositions,
+  ): Promise<APIResponse<FuturesPosition[]>> {
+    return this.getPrivate('/api/mix/v1/position/history-position', params);
+  }
+
   /** Get Account Bill */
   getAccountBill(params: FuturesAccountBillRequest): Promise<APIResponse<any>> {
     return this.getPrivate('/api/mix/v1/account/accountBill', params);
@@ -378,6 +393,11 @@ export class FuturesClient extends BaseRestClient {
       marginCoin,
       orderIds,
     });
+  }
+
+  /** Modify Order */
+  modifyOrder(params: ModifyFuturesOrder): Promise<APIResponse<any>> {
+    return this.postPrivate('/api/mix/v1/order/modifyOrder', params);
   }
 
   /**
@@ -542,12 +562,23 @@ export class FuturesClient extends BaseRestClient {
     return this.postPrivate('/api/mix/v1/plan/modifyTPSLPlan', params);
   }
 
-  /** Cancel Plan Order TPSL */
+  /** Cancel Plan Order (TPSL) */
   cancelPlanOrderTPSL(
     params: CancelFuturesPlanTPSL,
   ): Promise<APIResponse<any>> {
     return this.postPrivate('/api/mix/v1/plan/cancelPlan', params);
   }
+
+    /** Cancel Symbol Plan Order (TPSL) */
+    cancelSymbolPlanOrders(
+      symbol: string,
+      planType: FuturesPlanType,
+    ): Promise<APIResponse<any>> {
+      return this.postPrivate('/api/mix/v1/plan/cancelSymbolPlan', {
+        symbol,
+        planType,
+      });
+    }
 
   /** Cancel All Trigger Order (TPSL) */
   cancelAllPlanOrders(

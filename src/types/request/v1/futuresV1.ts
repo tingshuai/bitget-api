@@ -1,4 +1,4 @@
-import { OrderTimeInForce } from './shared';
+import { OrderTimeInForce } from '../shared';
 
 export type FuturesProductType =
   | 'umcbl'
@@ -88,6 +88,26 @@ export interface NewBatchFuturesOrder {
   clientOid?: string;
 }
 
+export interface ModifyFuturesOrder {
+  symbol: string;
+  orderId?: string;
+  clientOid?: string;
+  newClientOid?: string;
+  size?: string;
+  price?: string;
+  presetTakeProfitPrice?: string;
+  presetStopLossPrice?: string;
+}
+
+export interface FuturesHistoricPositions {
+  startTime: string;
+  endTime: string;
+  productType?: FuturesProductType;
+  symbol?: string;
+  pageSize?: number;
+  lastEndId?: string;
+}
+
 export interface FuturesPagination {
   startTime?: string;
   endTime?: string;
@@ -128,7 +148,14 @@ export interface ModifyFuturesPlanOrderTPSL {
   presetStopLossPrice?: string;
 }
 
-export type FuturesPlanType = 'profit_plan' | 'loss_plan' | 'moving_plan';
+export type FuturesPlanType =
+  | 'profit_plan'
+  | 'loss_plan'
+  | 'normal_plan'
+  | 'pos_profit'
+  | 'pos_loss'
+  | 'moving_plan'
+  | 'track_plan';
 
 export interface NewFuturesPlanStopOrder {
   symbol: string;
@@ -188,3 +215,15 @@ export interface HistoricPlanOrderTPSLRequest {
   isPre?: boolean;
   isPlan?: string;
 }
+
+/**
+ * @typedef  {string[6]} FuturesCandleData
+ * @property {Array[0]} Timestamp in milliseconds
+ * @property {Array[1]} Opening price
+ * @property {Array[2]} Highest price
+ * @property {Array[3]} Lowest price
+ * @property {Array[4]} Closing price - Value of the latest candle stick might change
+ * @property {Array[5]} Base currency trading volume
+ * @property {Array[6]} Quote currency trading volume
+ */
+export type FuturesCandleData = string[6];

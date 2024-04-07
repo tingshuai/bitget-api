@@ -8,7 +8,7 @@
 
 [1]: https://www.npmjs.com/package/bitget-api
 
-Node.js connector for the Bitget APIs and WebSockets:
+Updated & performant JavaScript & Node.js SDK for the Bitget V2 REST APIs and WebSockets:
 
 - Complete integration with all Bitget APIs.
 - TypeScript support (with type declarations for most API requests & responses).
@@ -45,7 +45,7 @@ Check out my related projects:
 
 Most methods pass values as-is into HTTP requests. These can be populated using parameters specified by Bitget's API documentation, or check the type definition in each class within this repository (see table below for convenient links to each class).
 
-- [Bitget API Documentation](https://www.bitget.com/docs-v5/en/#rest-api).
+- [Bitget API Documentation](https://www.bitget.com/api-doc/common/intro).
 
 ## Structure
 
@@ -65,10 +65,12 @@ The version on npm is the output from the `build` command and can be used in pro
 Each REST API group has a dedicated REST client. To avoid confusion, here are the available REST clients and the corresponding API groups:
 | Class | Description |
 |:------------------------------------: |:---------------------------------------------------------------------------------------------: |
-| [SpotClient](src/spot-client.ts) | [Spot APIs](https://bitgetlimited.github.io/apidoc/en/spot/#introduction) |
-| [FuturesClient](src/futures-client.ts) | [Futures APIs](https://bitgetlimited.github.io/apidoc/en/mix/#introduction) |
-| [BrokerClient](src/broker-client.ts) | [Broker APIs](https://bitgetlimited.github.io/apidoc/en/broker/#introduction) |
-| [WebsocketClient](src/websocket-client.ts) | Universal client for all Bitget's Websockets |
+| [RestClientV2](src/rest-client-v2.ts) | [V2 REST APIs](https://www.bitget.com/api-doc/common/intro) |
+| [WebsocketClient](src/websocket-client-v2.ts) | Universal client for all Bitget's V2 Websockets |
+| [~~SpotClient~~ (deprecated, use RestClientV2)](src/spot-client.ts) | [~~Spot APIs~~](https://bitgetlimited.github.io/apidoc/en/spot/#introduction) |
+| [~~FuturesClient~~ (deprecated, use RestClientV2)](src/futures-client.ts) | [~~Futures APIs~~](https://bitgetlimited.github.io/apidoc/en/mix/#introduction) |
+| [~~BrokerClient~~ (deprecated, use RestClientV2)](src/broker-client.ts) | [~~Broker APIs~~](https://bitgetlimited.github.io/apidoc/en/broker/#introduction) |
+| [~~WebsocketClient~~ (deprecated, use WebsocketClientV2)](src/websocket-client.ts) | ~~Universal client for all Bitget's V1 Websockets~~ |
 
 Examples for using each client can be found in:
 
@@ -81,54 +83,57 @@ If you're missing an example, you're welcome to request one. Priority will be gi
 
 First, create API credentials on Bitget's website.
 
-All REST clients have can be used in a similar way. However, method names, parameters and responses may vary depending on the API category you're using!
+All REST endpoints should be included in the [RestClientV2](src/rest-client-v2.ts) class. If any endpoints are missing or need improved types, pull requests are very welcome. You can also open an issue on this repo to request an improvement. Priority will be given to [github sponsors](https://github.com/sponsors/tiagosiebler).
 
-Not sure which function to call or which parameters to use? Click the class name in the table above to look at all the function names (they are in the same order as the official API docs), and check the API docs for a list of endpoints/paramters/responses.
+Not sure which function to call or which parameters to use? Click the class name in the table above to look at all the function names (they are in the same order as the official API docs), and check the API docs for a list of endpoints/parameters/responses.
+
+If you found the method you're looking for in the API docs, you can also search for the endpoint in the [RestClientV2](src/rest-client-v2.ts) class.
 
 ```javascript
-const {
-  SpotClient,
-  FuturesClient,
-  BrokerClient,
-} = require('bitget-api');
+const { RestClientV2 } = require('bitget-api');
 
 const API_KEY = 'xxx';
 const API_SECRET = 'yyy';
 const API_PASS = 'zzz';
 
-const client = new SpotClient({
+const client = new RestClientV2(
+  {
     apiKey: API_KEY,
     apiSecret: API_SECRET,
     apiPass: API_PASS,
-},
+  },
   // requestLibraryOptions
 );
 
 // For public-only API calls, simply don't provide a key & secret or set them to undefined
-// const client = new SpotClient();
+// const client = new RestClientV2();
 
-
-client.getApiKeyInfo()
-  .then(result => {
-    console.log("getApiKeyInfo result: ", result);
+client
+  .getSpotAccount()
+  .then((result) => {
+    console.log('getSpotAccount result: ', result);
   })
-  .catch(err => {
-    console.error("getApiKeyInfo error: ", err);
+  .catch((err) => {
+    console.error('getSpotAccount error: ', err);
   });
 
-const symbol = 'BTCUSDT_SPBL';
-client.getCandles(symbol, '1min');
-  .then(result => {
-    console.log("getCandles result: ", result);
+client
+  .getSpotCandles({
+    symbol: 'BTCUSDT',
+    granularity: '1min',
+    limit: '1000',
   })
-  .catch(err => {
-    console.error("getCandles error: ", err);
+  .then((result) => {
+    console.log('getCandles result: ', result);
+  })
+  .catch((err) => {
+    console.error('getCandles error: ', err);
   });
 ```
 
 #### WebSockets
 
-For more examples, including how to use websockets with bitget, check the [examples](./examples/) and [test](./test/) folders.
+For more examples, including how to use websockets with Bitget, check the [examples](./examples/) and [test](./test/) folders.
 
 ---
 
@@ -141,16 +146,19 @@ Pass a custom logger which supports the log methods `silly`, `debug`, `notice`, 
 ```javascript
 const { WebsocketClient, DefaultLogger } = require('bitget-api');
 
-// Disable all logging on the silly level
-DefaultLogger.silly = () => {};
+// Disable all logging on the silly level (less console logs)
+const customLogger = {
+  ...DefaultLogger,
+  silly: () => {},
+};
 
-const ws = new WebsocketClient(
+const ws = new WebsocketClientV2(
   {
     apiKey: 'API_KEY',
     apiSecret: 'API_SECRET',
     apiPass: 'API_PASS',
   },
-  DefaultLogger,
+  customLogger,
 );
 ```
 
@@ -160,13 +168,43 @@ In rare situations, you may want to see the raw HTTP requets being built as well
 
 ## Browser Usage
 
+### Import
+
+This is the "modern" way, allowing the package to be directly imported into frontend projects with full typescript support.
+
+1. Install these dependencies
+   ```sh
+   npm install crypto-browserify stream-browserify
+   ```
+2. Add this to your `tsconfig.json`
+   ```json
+   {
+     "compilerOptions": {
+       "paths": {
+         "crypto": [
+           "./node_modules/crypto-browserify"
+         ],
+         "stream": [
+           "./node_modules/stream-browserify"
+         ]
+   }
+   ```
+3. Declare this in the global context of your application (ex: in polyfills for angular)
+   ```js
+   (window as any).global = window;
+   ```
+
+### Webpack
+
+This is the "old" way of using this package on webpages. This will build a minified js bundle that can be pulled in using a script tag on a website.
+
 Build a bundle using webpack:
 
 - `npm install`
 - `npm build`
 - `npm pack`
 
-The bundle can be found in `dist/`. Altough usage should be largely consistent, smaller differences will exist. Documentation is still TODO.
+The bundle can be found in `dist/`. Altough usage should be largely consistent, smaller differences will exist. Documentation is still TODO - contributions welcome.
 
 ---
 
@@ -183,11 +221,6 @@ Support my efforts to make algo trading accessible to all - register with my ref
 - [Bitget](https://partner.bitget.com/bg/ZNM295)
 - [OKX](https://www.okx.com/join/18504944)
 - [FTX](https://ftx.com/referrals#a=ftxapigithub)
-
-Or buy me a coffee using any of these:
-
-- BTC: `1C6GWZL1XW3jrjpPTS863XtZiXL1aTK7Jk`
-- ETH (ERC20): `0xd773d8e6a50758e1ada699bb6c4f98bb4abf82da`
 
 ### Contributions & Pull Requests
 
