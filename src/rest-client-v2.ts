@@ -882,7 +882,7 @@ export class RestClientV2 extends BaseRestClient {
     return this.getPrivate('/api/v2/earn/savings/assets', params);
   }
 
-  getSavingAssetsHistory(params) {
+  getSavingRecords(params) {
     return this.getPrivate('/api/v2/earn/savings/records', params);
   }
 
